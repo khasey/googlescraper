@@ -8,10 +8,6 @@ from selenium.webdriver.chrome.service import Service
 from progress.bar import Bar
 from colorama import Back, Fore, Style
 
-
-s=Service('./geckodriver')
-driver = webdriver.Firefox(service=s)
-
 def Banner():
     colorama.init(autoreset=True)
     print(Fore.RED + """                                                                      
@@ -28,32 +24,21 @@ def Banner():
                                                      coded by KHASEY               
         """)
 
-def start():
-    try:
-        driver.get("https://www.google.com/")
-        Banner()
-    
-    except:
-        print("Problem with the custom header") 
-             
+def Start(driver):
+    try: driver.get("https://www.google.com/")
+    except: print("Problem with the custom header")  
+
+def Wait():
+    time.sleep(5)
         
-def Search():
+def Search(driver, current):
     try:
-        
-        if len(sys.argv) < 2:
-            print("usage => python3 <prog name> <arg>")
-        if len(sys.argv) > 2:
-            print("correct way = python3 scrapgoogle.py [search element]")
-            driver.quit()
-        else:
-            arg = sys.argv[1]
-            driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(arg)
-            driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys(Keys.ENTER)
-    
+        driver.find_element(By.XPATH,'//*[@id="APjFqb"]').send_keys(current)
+        driver.find_element(By.XPATH,'//*[@id="APjFqb"]').send_keys(Keys.ENTER)
     except:
         print("pas de recherche")           
 
-def Write():
+def Write(driver):
     try:
         lnks = driver.find_elements(By.TAG_NAME,'a')
         array = []
@@ -68,33 +53,40 @@ def Write():
         print("pas de file")                    
         
 
-def Next():
+def Next(driver):
     try:
-        
-        i = 0
-        j = 0
+        count = 0
         while True:
-            bar = Bar(Fore.RED + 'Pages =>',max=i, fill='#')
+            bar = Bar(Fore.RED + 'Pages =>', max=count, fill='#')
             ret = driver.find_element(By.XPATH,'//*[@id="pnnext"]')
             if ret:
-                Write()
-                time.sleep(2)
+                Write(driver)
+                time.sleep(4)
                 ret.click()
-                bar.next(j)
-                j = j + 1
-                i = i + 1
-            else:
-                break
+                bar.next(count)
+                count += 1
+            else: break
     except:
         print(Fore.GREEN + "Scarp is over")
-        #driver.quit()
 
+Banner()
 
-start()
-time.sleep(2)
-driver.find_element(By.XPATH,'//*[@id="L2AGLb"]').click()
-time.sleep(2)
-Search()
-time.sleep(2)
-Next()
+if len(sys.argv) < 2:
+    print("usage => python3 <prog name> <args>")
+    exit()
+
+driver = webdriver.Firefox(service=Service('./geckodriver'))
+first = True
+for current in sys.argv[1:]:
+    print("Processing argument: " + current)
+    Start(driver)
+    Wait()
+    if (first):
+        driver.find_element(By.XPATH, '//*[@id="L2AGLb"]').click()
+        first = False
+    Wait()
+    Search(driver, current)
+    Wait()
+    Next(driver)
 driver.quit()
+

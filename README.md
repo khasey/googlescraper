@@ -1,6 +1,8 @@
 
 # Google Scraper
 
+![Screenshot](previewBingScrap.png)
+
 this is a python selenium bot
 
 
